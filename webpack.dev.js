@@ -5,7 +5,7 @@ const common = require("./webpack.common.js");
 const config = import("./src/server/config.mjs");
 const themeConfig = import("./src/server/theme.mjs");
 
-let port = 9000;
+let port = Number(process.env.PORT || 9000);
 // proxy is setup to make frontend and backend url same for local testing
 let proxy = [
   {
@@ -22,7 +22,7 @@ let proxy = [
   },
   {
     context: ["/api"],
-    target: "http://localhost:8080",
+    target: process.env.API_PROXY_TARGET || "http://localhost:8080",
     pathRewrite: { "^/api": "" },
     changeOrigin: true,
   },

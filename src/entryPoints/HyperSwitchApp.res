@@ -25,7 +25,7 @@ let make = () => {
     merchantDetailsValueAtom,
   )
   let featureFlagDetails = featureFlagAtom->Recoil.useRecoilValueFromAtom
-  let (userGroupACL, setuserGroupACL) = Recoil.useRecoilState(userGroupACLAtom)
+  let setuserGroupACL = Recoil.useSetRecoilState(userGroupACLAtom)
   let {getThemesJson} = React.useContext(ThemeProvider.themeContext)
   let {fetchMerchantSpecificConfig} = MerchantSpecificConfigHook.useMerchantSpecificConfig()
   let {fetchUserGroupACL, hasAnyGroupAccess, userHasAccess} = GroupACLHooks.useUserGroupACLHook()
@@ -37,7 +37,11 @@ let make = () => {
     UserInfoProvider.defaultContext,
   )
   let {roleId} = getResolvedUserInfo()
+  let isCollectionMerchant = DashboardAccess.isCollectionRole(roleId)
   let {orgId, merchantId, profileId, version} = getCommonSessionDetails()
+  let sessionKey = `${orgId}:${merchantId}:${profileId}`
+  let (loadedSession, setLoadedSession) = React.useState(_ => "")
+  let sessionReady = loadedSession == sessionKey
 
   let isInternalUser = roleId->HyperSwitchUtils.checkIsInternalUser
   let {logoURL} = React.useContext(ThemeProvider.themeContext)
@@ -56,7 +60,9 @@ let make = () => {
     }
   }
 
+  let captureSession = DashboardSessionGuard.useGuard()
   let setUpDashboard = async () => {
+    let isCurrentSession = captureSession()
     try {
       // NOTE: Treat groupACL map similar to screenstate
       setScreenState(_ => PageLoaderWrapper.Loading)
@@ -93,10 +99,19 @@ let make = () => {
         userGroupACLFetch,
         merchantAccountFetch(),
       ))
-      setActiveProductValue(productType)
-      setShowSideBar(_ => true)
+      if isCurrentSession() {
+        setActiveProductValue(productType)
+        setShowSideBar(_ => true)
+        setDashboardPageState(_ => #HOME)
+        setLoadedSession(_ => sessionKey)
+        setScreenState(_ => PageLoaderWrapper.Success)
+      }
     } catch {
-    | _ => setScreenState(_ => PageLoaderWrapper.Error("Failed to setup dashboard!"))
+    | _ =>
+      if isCurrentSession() {
+        setLoadedSession(_ => sessionKey)
+        setScreenState(_ => PageLoaderWrapper.Error("Failed to setup dashboard!"))
+      }
     }
   }
 
@@ -110,13 +125,6 @@ let make = () => {
     None
   }, [themeId])
 
-  React.useEffect(() => {
-    if userGroupACL->Option.isSome {
-      setDashboardPageState(_ => #HOME)
-      setScreenState(_ => PageLoaderWrapper.Success)
-    }
-    None
-  }, [userGroupACL])
   let pageViewEvent = MixpanelHook.usePageView()
   let path = url.path->List.toArray->Array.joinWith("/")
 
@@ -155,13 +163,17 @@ let make = () => {
           // TODO: Change the key to only profileId once the userInfo starts sending profileId
           <div className={`h-screen flex flex-col`}>
             <div className="flex relative  h-screen ">
-              <RenderIf condition={screenState === Success}>
+              <RenderIf condition={sessionReady && screenState === Success}>
                 <Sidebar
-                  path=url.path sidebars={hyperSwitchAppSidebars} productSiebars=productSidebars
+                  path=url.path
+                  sidebars={hyperSwitchAppSidebars}
+                  productSiebars={isCollectionMerchant ? [] : productSidebars}
                 />
               </RenderIf>
               <PageLoaderWrapper
-                screenState={screenState} sectionHeight="!h-screen w-full" showLogoutButton=true>
+                screenState={sessionReady ? screenState : PageLoaderWrapper.Loading}
+                sectionHeight="!h-screen w-full"
+                showLogoutButton=true>
                 <div
                   className="flex relative flex-col flex-1 bg-hyperswitch_background dark:bg-black overflow-scroll md:overflow-x-hidden">
                   <div className="w-full max-w-fixedPageWidth md:px-12 px-5 pt-3">
@@ -250,8 +262,17 @@ let make = () => {
                       className={isDecisionEngineWorkspace
                         ? "flex flex-col min-h-full"
                         : "p-6 md:px-12 md:py-8 flex flex-col gap-8 max-w-fixedPageWidth min-h-full"}>
-                      <ErrorBoundary>
+                      <DashboardPortal />
+                      <ErrorBoundary key={`${orgId}:${merchantId}:${profileId}`}>
                         {switch (activeProduct, url.path->urlPath) {
+                        | (_, path) if !DashboardAccess.canVisit(roleId, path) =>
+                          <UnauthorizedPage
+                            message="This page is managed by your platform administrator."
+                          />
+                        | (_, list{"platform"}) => <PlatformManagement />
+                        | (_, list{"home", ..._})
+                        | (_, list{"v2", "home"}) if isCollectionMerchant =>
+                          <CollectionHome />
                         // /* DEFAULT HOME */
                         | (_, list{"v2", "home"}) => <DefaultHome />
 

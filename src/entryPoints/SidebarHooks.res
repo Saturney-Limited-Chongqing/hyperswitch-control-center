@@ -298,5 +298,43 @@ let useGetSidebarValuesForCurrentActive = () => {
   | OnBoarding(_)
   | UnknownProduct => []
   }
-  defaultSidebar->Array.concat(sidebarValuesForProduct)
+  let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
+  if DashboardAccess.isCollectionRole(roleId) {
+    [
+      Link({name: "Overview", icon: "nd-home", link: "/home", access: Access}),
+      Section({
+        name: "Collections",
+        icon: "nd-operations",
+        showSection: true,
+        links: [
+          payments(userHasResourceAccess),
+          refunds(userHasResourceAccess),
+          disputes(userHasResourceAccess),
+          customers(userHasResourceAccess),
+          paymentLinks(userHasResourceAccess),
+        ],
+      }),
+      Section({
+        name: "Reports",
+        icon: "nd-analytics",
+        showSection: true,
+        links: [paymentAnalytcis(~userHasResourceAccess)],
+      }),
+      Section({
+        name: "Developer settings",
+        icon: "nd-settings",
+        showSection: true,
+        links: [
+          apiKeys(userHasResourceAccess),
+          webhooks(userHasResourceAccess),
+          userManagement(userHasResourceAccess),
+        ],
+      }),
+    ]
+  } else {
+    let portalLinks = DashboardAccess.isPlatformRole(roleId)
+      ? [Link({name: "Merchant management", icon: "nd-user", link: "/platform", access: Access})]
+      : []
+    portalLinks->Array.concat(defaultSidebar)->Array.concat(sidebarValuesForProduct)
+  }
 }

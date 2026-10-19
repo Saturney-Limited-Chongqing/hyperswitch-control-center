@@ -6,7 +6,9 @@ let useFetchUserMerchantDetails = () => {
 
   let fetchDetails = useGetMethod()
 
+  let captureSession = DashboardSessionGuard.useGuard()
   async (~version: UserInfoTypes.version=V1) => {
+    let isCurrentSession = captureSession()
     try {
       let merchantDetailsJSON = switch version {
       | V1 => {
@@ -24,6 +26,9 @@ let useFetchUserMerchantDetails = () => {
       }
       let (product_type, merchant_account_type) =
         merchantDetailsJSON->MerchantAccountDetailsMapper.getUserMerchantDetails(~version)
+      if !isCurrentSession() {
+        Exn.raiseError("Dashboard session changed")
+      }
       setMerchantDetailsValue(prev => {...prev, product_type, merchant_account_type})
       product_type
     } catch {
@@ -41,7 +46,9 @@ let useFetchMerchantDetails = () => {
 
   let fetchDetails = useGetMethod()
 
+  let captureSession = DashboardSessionGuard.useGuard()
   async (~version: UserInfoTypes.version=V1) => {
+    let isCurrentSession = captureSession()
     try {
       let merchantDetailsJSON = switch version {
       | V1 => {
@@ -55,6 +62,9 @@ let useFetchMerchantDetails = () => {
       }
       let jsonToTypedValue =
         merchantDetailsJSON->MerchantAccountDetailsMapper.getMerchantDetails(~version)
+      if !isCurrentSession() {
+        Exn.raiseError("Dashboard session changed")
+      }
       setMerchantDetailsValue(_ => jsonToTypedValue)
       jsonToTypedValue
     } catch {

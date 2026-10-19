@@ -29,7 +29,9 @@ let useMerchantSpecificConfig = () => {
     UserInfoProvider.defaultContext,
   ).getCommonSessionDetails()
 
+  let captureSession = DashboardSessionGuard.useGuard()
   let fetchMerchantSpecificConfig = async () => {
+    let isCurrentSession = captureSession()
     try {
       let domain = HSLocalStorage.getDomainfromStore()->Option.getOr("")
       let merchantConfigURL = ` ${GlobalVars.getHostUrlWithBasePath}/config/merchant?domain=${domain}` // todo: domain shall be removed from query params later
@@ -41,7 +43,9 @@ let useMerchantSpecificConfig = () => {
         ]->LogicUtils.getJsonFromArrayOfJson
       let response = await updateAPIHook(merchantConfigURL, body, Post)
       let mapMerchantSpecificConfig = response->FeatureFlagUtils.merchantSpecificConfig
-      setMerchantSpecificConfig(_ => mapMerchantSpecificConfig)
+      if isCurrentSession() {
+        setMerchantSpecificConfig(_ => mapMerchantSpecificConfig)
+      }
     } catch {
     | Exn.Error(e) => {
         let err = Exn.message(e)->Option.getOr("Failed to Fetch!")

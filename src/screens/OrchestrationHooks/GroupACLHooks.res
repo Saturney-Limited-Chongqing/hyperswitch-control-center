@@ -39,7 +39,9 @@ let useUserGroupACLHook = () => {
   let setuserPermissionJson = Recoil.useSetRecoilState(userPermissionAtom)
   let {isEmbeddableSession} = React.useContext(UserInfoProvider.defaultContext)
 
+  let captureSession = DashboardSessionGuard.useGuard()
   let fetchUserGroupACL = async () => {
+    let isCurrentSession = captureSession()
     try {
       let url = getURL(~entityName=V1(USERS), ~userType=#GET_GROUP_ACL, ~methodType=Get)
       let response = await fetchDetails(url)
@@ -56,6 +58,9 @@ let useUserGroupACLHook = () => {
       let accessMapping: accessMapping = {
         groups: userGroupACLMap,
         resources: resourceACLMap,
+      }
+      if !isCurrentSession() {
+        Exn.raiseError("Dashboard session changed")
       }
       setuserGroupACL(_ => Some(accessMapping))
 

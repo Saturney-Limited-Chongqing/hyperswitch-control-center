@@ -639,6 +639,11 @@ let make = (
   let (exploredModules, unexploredModules) = useGetSidebarProductModules()
   let {devModularityV2, devSidebarV2, devTheme, devUsers} =
     HyperswitchAtom.featureFlagAtom->Recoil.useRecoilValueFromAtom
+  // The explicit platform/collection navigation must work with either sidebar flag.
+  let usePortalNavigation =
+    DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
+  let devSidebarV2 = devSidebarV2 && !usePortalNavigation
+
   let merchantList = Recoil.useRecoilValueFromAtom(HyperswitchAtom.merchantListAtom)
   let (openItem, setOpenItem) = React.useState(_ => "")
   let expandedSections = [activeProduct->getProductDisplayName]

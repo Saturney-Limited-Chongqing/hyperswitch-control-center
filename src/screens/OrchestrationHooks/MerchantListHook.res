@@ -33,8 +33,10 @@ let useFetchMerchantList = () => {
   let {merchantId} = React.useContext(UserInfoProvider.defaultContext).getCommonSessionDetails()
 
   let v2MerchantListFetcher = useFetchMerchantListV2()
+  let captureSession = DashboardSessionGuard.useGuard()
 
   async () => {
+    let isCurrentSession = captureSession()
     try {
       let v1MerchantListUrl = getURL(
         ~entityName=V1(USERS),
@@ -47,9 +49,12 @@ let useFetchMerchantList = () => {
       let concatenatedList = v1MerchantResponse->getArrayFromJson([])->Array.concat(v2MerchantList)
       let response = concatenatedList->uniqueObjectFromArrayOfObjects(keyExtractorForMerchantid)
       let concatenatedListTyped = response->getMappedValueFromArrayOfJson(merchantItemToObjMapper)
-      setMerchantList(_ => concatenatedListTyped)
+      if isCurrentSession() {
+        setMerchantList(_ => concatenatedListTyped)
+      }
     } catch {
-    | _ => {
+    | _ =>
+      if isCurrentSession() {
         setMerchantList(_ => [ompDefaultValue(merchantId, "")])
         showToast(~message="Failed to fetch merchant list", ~toastType=ToastError)
       }
