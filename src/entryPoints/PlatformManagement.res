@@ -46,5 +46,6 @@ let make = () => {
       )
       ->React.array}
     </div>
+    <ChannelDailyLimits />
   </section>
 }
