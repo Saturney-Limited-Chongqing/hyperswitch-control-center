@@ -123,6 +123,7 @@ let useApiFetcher = () => {
       ~contentType=Headers("application/json"),
       ~xFeatureRoute,
       ~forceCookies,
+      ~includeCredentials=false,
       ~sendV1DummyApiKeyHeader=false,
       ~merchantId="",
       ~profileId="",
@@ -166,7 +167,7 @@ let useApiFetcher = () => {
           Fetch.RequestInit.make(
             ~method_,
             ~body?,
-            ~credentials={forceCookies ? SameOrigin : Omit},
+            ~credentials={includeCredentials ? Include : forceCookies ? SameOrigin : Omit},
             ~headers=getHeaders(
               ~headers,
               ~uri,

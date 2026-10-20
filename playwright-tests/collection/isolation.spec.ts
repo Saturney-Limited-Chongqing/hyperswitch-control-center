@@ -66,7 +66,9 @@ test("two merchants receive distinct collection dashboards and cannot open admin
     const ownLabel = index === 0 ? "A" : "B";
     const otherLabel = index === 0 ? "B" : "A";
     await expect(
-      page.getByText(`Merchant ${ownLabel} private customer`, { exact: true }),
+      page
+        .getByText(`Merchant ${ownLabel} private customer`, { exact: true })
+        .first(),
     ).toBeVisible({ timeout: 60000 });
     await expect(
       page.getByText(`Merchant ${otherLabel} private customer`, {

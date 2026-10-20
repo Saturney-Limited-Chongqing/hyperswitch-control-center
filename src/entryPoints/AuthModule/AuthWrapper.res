@@ -155,7 +155,10 @@ let make = (~children) => {
     let authMethodType = method.auth_method.\"type"
     let authMethodName = method.auth_method.name
     switch (authMethodType, authMethodName) {
-    | (OPEN_ID_CONNECT, #Okta) | (OPEN_ID_CONNECT, #Google) | (OPEN_ID_CONNECT, #Github) =>
+    | (OPEN_ID_CONNECT, #Rauthy)
+    | (OPEN_ID_CONNECT, #Okta)
+    | (OPEN_ID_CONNECT, #Google)
+    | (OPEN_ID_CONNECT, #Github) =>
       <Button
         text={`Continue with ${(authMethodName :> string)}`}
         buttonType={PrimaryOutline}

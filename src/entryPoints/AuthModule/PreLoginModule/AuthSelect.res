@@ -61,7 +61,10 @@ let make = (~setSelectedAuthId) => {
         customButtonStyle="!w-full"
         onClick={_ => handleTerminateSSO(method.id)->ignore}
       />
-    | (OPEN_ID_CONNECT, #Okta) | (OPEN_ID_CONNECT, #Google) | (OPEN_ID_CONNECT, #Github) =>
+    | (OPEN_ID_CONNECT, #Rauthy)
+    | (OPEN_ID_CONNECT, #Okta)
+    | (OPEN_ID_CONNECT, #Google)
+    | (OPEN_ID_CONNECT, #Github) =>
       <Button
         text={`Login with ${(authMethodName :> string)}`}
         buttonType={PrimaryOutline}

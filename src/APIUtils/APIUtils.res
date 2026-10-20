@@ -2070,7 +2070,7 @@ let useGetMethod = (~showErrorToast=true) => {
   }
 }
 
-let useUpdateMethod = (~showErrorToast=true) => {
+let useUpdateMethod = (~showErrorToast=true, ~includeCredentials=false) => {
   let {merchantId, profileId} = React.useContext(
     UserInfoProvider.defaultContext,
   ).getCommonSessionDetails()
@@ -2120,6 +2120,7 @@ let useUpdateMethod = (~showErrorToast=true) => {
         ~contentType,
         ~xFeatureRoute,
         ~forceCookies,
+        ~includeCredentials,
         ~sendV1DummyApiKeyHeader,
         ~merchantId,
         ~profileId,

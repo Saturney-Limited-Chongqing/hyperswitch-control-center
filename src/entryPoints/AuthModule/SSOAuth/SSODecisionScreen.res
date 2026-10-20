@@ -3,7 +3,11 @@ module SSOFromRedirect = {
   let make = (~localSSOState) => {
     open SSOTypes
     open APIUtils
-    let updateDetails = useUpdateMethod()
+    let includeCredentials = switch localSSOState {
+    | SSO_FROM_REDIRECT(#Rauthy(_)) => true
+    | _ => false
+    }
+    let updateDetails = useUpdateMethod(~includeCredentials)
     let getURL = useGetURL()
 
     let {setAuthStatus} = React.useContext(AuthInfoProvider.authStatusContext)
@@ -12,7 +16,8 @@ module SSOFromRedirect = {
       open AuthUtils
       try {
         let body = switch localSSOState {
-        | SSO_FROM_REDIRECT(#Okta(data)) => data->Identity.genericTypeToJson
+        | SSO_FROM_REDIRECT(#Okta(data)) | SSO_FROM_REDIRECT(#Rauthy(data)) =>
+          data->Identity.genericTypeToJson
         | _ => Dict.make()->JSON.Encode.object
         }
         let ssoUrl = getURL(~entityName=V1(USERS), ~userType=#SIGN_IN_WITH_SSO, ~methodType=Post)
@@ -43,19 +48,20 @@ let make = (~auth_id: option<string>) => {
   let path = url.path->List.toArray->Array.joinWith("/")
   let (localSSOState, setLocalSSOState) = React.useState(_ => LOADING)
 
-  let oktaMethod = () => {
+  let oidcMethod = provider => {
     open LogicUtils
     let dict = url.search->getDictFromUrlSearchParams
     let okta = {
       code: dict->Dict.get("code"),
       state: dict->Dict.get("state"),
     }
-    setLocalSSOState(_ => SSO_FROM_REDIRECT(#Okta(okta)))
+    setLocalSSOState(_ => SSO_FROM_REDIRECT(provider == "rauthy" ? #Rauthy(okta) : #Okta(okta)))
   }
 
   React.useEffect(() => {
     switch (url.path, auth_id) {
-    | (list{"redirect", "oidc", "okta"}, _) => oktaMethod()
+    | (list{"redirect", "oidc", "okta"}, _) => oidcMethod("okta")
+    | (list{"redirect", "oidc", "rauthy"}, _) => oidcMethod("rauthy")
     | (_, Some(str)) => Window.Location.replace(`${Window.env.apiBaseUrl}/user/auth/url?id=${str}`)
     | _ => ()
     }

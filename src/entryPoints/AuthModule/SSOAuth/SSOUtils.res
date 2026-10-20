@@ -5,6 +5,7 @@ let authMethodsNameToVariantMapper = value => {
   | "password" => #Password
   | "magic_link" => #Magic_Link
   | "okta" => #Okta
+  | "rauthy" => #Rauthy
   | "google" => #Google
   | "github" => #Github
   | _ => #Password
