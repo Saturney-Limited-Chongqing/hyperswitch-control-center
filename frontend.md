@@ -49,6 +49,12 @@ COLLECTION_TEST_UI_URL=http://10.100.100.22:19001 ./test.sh --browser
 
 `tests/dashboard-access.test.mjs` 检查访问规则；`playwright-tests/collection/isolation.spec.ts` 检查双商户浏览器隔离；`playwright-tests/collection/rauthy.spec.ts` 检查 Rauthy 登录。真实 Logto 联调也应覆盖平台和两个独立组织商户，不能只靠前端单测。测试夹具、邮箱密码和令牌不得提交。
 
+## 新增支付 Connector 时前端怎么接
+
+Connector 的 HTTP 协议、签名、退款和 webhook 实现在后端 `crates/hyperswitch_connectors`；前端只负责平台管理员配置渠道账户和查看状态。后端 `backend.md` 的“以后新增支付 Connector”与仓库根目录 `add_connector.md` 是开发入口。不要把渠道私钥、客户端密钥或后台管理员 Key 写入静态资源或浏览器环境变量。
+
+接入一个新渠道时，先确认后端已注册连接器枚举、可用支付方式、认证字段和环境配置。随后检查本仓库 `src/screens/Connectors/ConnectorTypes.res`、`ConnectorUtils.res`、连接器列表/配置表单及 `public/hyperswitch/assets/Gateway/` 图标，让平台管理员能识别、创建并查看该渠道账户；若路由编辑依赖 `euclid_wasm`，按照后端 `add_connector.md` 的说明重新构建并核对 WASM 产物。上游指南里的旧图标路径与当前仓库不同，以当前目录为准。商户角色不能因此获得 `/connectors`、`/routing` 或 `/platform/channel-limits` 的访问权限。完成后运行 `./test.sh`、平台创建/编辑渠道的浏览器测试，以及商户直接访问管理 URL 的拒绝测试。新渠道是否真正可收款、退款和处理回调，必须由后端沙箱联调验证，不能只看前端列表中出现图标。
+
 ## 接手时优先处理
 
 1. 逐页统一中文文案、表格密度、表单和错误提示。平台首页后的上游高级页面仍有英语，当前并非“全面中文化”。
