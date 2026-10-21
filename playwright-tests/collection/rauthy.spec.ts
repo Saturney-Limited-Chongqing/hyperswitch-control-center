@@ -111,11 +111,7 @@ test.describe("Rauthy OIDC", () => {
           "/platform",
         );
         await page.goto(home.href);
-        await expect(
-          page.getByText(
-            "This page is managed by your platform administrator.",
-          ),
-        ).toBeVisible();
+        await expect(page.getByText("此页面由平台管理员管理。")).toBeVisible();
         const other =
           user.merchant_id === "collection_a" ? "collection_b" : "collection_a";
         const cross = await request.get(
@@ -126,7 +122,7 @@ test.describe("Rauthy OIDC", () => {
         expect(cross.status()).toBeLessThan(500);
       } else {
         await expect(page.getByTestId("dashboard-identity")).toContainText(
-          "Platform administration",
+          "平台管理",
           { timeout: 60000 },
         );
       }

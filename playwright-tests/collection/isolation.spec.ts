@@ -47,7 +47,7 @@ test("two merchants receive distinct collection dashboards and cannot open admin
       timeout: 60000,
     });
     await expect(page.getByTestId("dashboard-identity")).toContainText(
-      "Merchant dashboard",
+      "商户中心",
     );
     await expect(page.getByTestId("dashboard-identity")).toContainText(
       merchant.merchant_id,
@@ -55,9 +55,7 @@ test("two merchants receive distinct collection dashboards and cannot open admin
     await expect(page.getByTestId("dashboard-identity")).not.toContainText(
       other.merchant_id,
     );
-    await expect(
-      page.getByText("Merchant management", { exact: true }),
-    ).toHaveCount(0);
+    await expect(page.getByText("商户管理", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Workflow", { exact: true })).toHaveCount(0);
     await expect(page.getByTestId("channel-daily-limits")).toHaveCount(0);
     await page.screenshot({
@@ -80,9 +78,9 @@ test("two merchants receive distinct collection dashboards and cannot open admin
 
     for (const route of ["/connectors", "/routing", "/platform"]) {
       await page.goto(managementPath(home, route));
-      await expect(
-        page.getByText("This page is managed by your platform administrator."),
-      ).toBeVisible({ timeout: 60000 });
+      await expect(page.getByText("此页面由平台管理员管理。")).toBeVisible({
+        timeout: 60000,
+      });
     }
     await context.close();
   }
@@ -101,10 +99,10 @@ test("platform administrator can see both merchants and open the management hub"
   const page = await context.newPage();
   await page.goto(baseURL!);
   await expect(page.getByTestId("dashboard-identity")).toContainText(
-    "Platform administration",
+    "平台管理",
     { timeout: 60000 },
   );
-  await page.getByText("Merchant management", { exact: true }).click();
+  await page.getByText("商户管理", { exact: true }).first().click();
   const hub = page.getByTestId("platform-management");
   await expect(hub).toBeVisible();
   for (const merchant of fixtures.merchants) {
@@ -116,9 +114,7 @@ test("platform administrator can see both merchants and open the management hub"
   const row = hub
     .getByText(secondMerchant.merchant_id, { exact: true })
     .locator("../..");
-  await row
-    .getByRole("button", { name: "Manage merchant", exact: true })
-    .click();
+  await row.getByRole("button", { name: "进入商户", exact: true }).click();
   await expect(page.getByTestId("dashboard-identity")).toContainText(
     secondMerchant.merchant_id,
   );
@@ -148,10 +144,10 @@ test("platform administrator configures a channel daily allowance", async ({
   const page = await context.newPage();
   await page.goto(baseURL!);
   await expect(page.getByTestId("dashboard-identity")).toContainText(
-    "Platform administration",
+    "平台管理",
     { timeout: 60000 },
   );
-  await page.getByText("Merchant management", { exact: true }).click();
+  await page.getByText("商户管理", { exact: true }).first().click();
   const panel = page.getByTestId("channel-daily-limits");
   await expect(panel).toBeVisible();
   // Existing bindings are immutable: reuse the current test account's pool.
@@ -167,28 +163,24 @@ test("platform administrator configures a channel daily allowance", async ({
       row.currency === "USD",
   );
   expect(policy).toBeTruthy();
-  await panel
-    .getByLabel("Merchant ID", { exact: true })
-    .fill(merchant.merchant_id);
-  await panel.getByLabel("Channel account ID").fill(merchant.connector_id);
-  await panel.getByLabel("Shared pool ID").fill(policy.pool_id);
-  await panel.getByLabel("Currency", { exact: true }).fill("USD");
-  await panel.getByLabel("Timezone", { exact: true }).fill(policy.timezone);
-  await panel.getByLabel("Daily amount").fill("3000.001");
-  await panel.getByRole("button", { name: "Save daily limit" }).click();
-  await expect(panel.getByRole("status")).toContainText(
-    "correct number of decimal places",
-  );
-  await panel.getByLabel("Daily amount").fill("3000.00");
+  await panel.getByLabel("商户 ID", { exact: true }).fill(merchant.merchant_id);
+  await panel.getByLabel("渠道账户 ID").fill(merchant.connector_id);
+  await panel.getByLabel("共享额度池 ID").fill(policy.pool_id);
+  await panel.getByLabel("币种", { exact: true }).fill("USD");
+  await panel.getByLabel("统计时区", { exact: true }).fill(policy.timezone);
+  await panel.getByLabel("每日限额").fill("3000.001");
+  await panel.getByRole("button", { name: "保存每日限额" }).click();
+  await expect(panel.getByRole("status")).toContainText("小数位要求");
+  await panel.getByLabel("每日限额").fill("3000.00");
   const saved = page.waitForResponse(
     (response) =>
       response.url().endsWith("/configs/channel-limits") &&
       response.request().method() === "POST",
   );
-  await panel.getByRole("button", { name: "Save daily limit" }).click();
+  await panel.getByRole("button", { name: "保存每日限额" }).click();
   const response = await saved;
   expect(response.status()).toBe(200);
   expect((await response.json()).daily_limit).toBe(300000);
-  await expect(panel.getByRole("status")).toHaveText("Channel limit saved.");
+  await expect(panel.getByRole("status")).toHaveText("每日限额已保存。");
   await context.close();
 });

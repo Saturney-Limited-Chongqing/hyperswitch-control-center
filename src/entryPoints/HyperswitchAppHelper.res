@@ -13,7 +13,7 @@ module LiveMode = {
             />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-hyperswitch_green" />
           </span>
-          <span className="font-semibold"> {"Live Mode"->React.string} </span>
+          <span className="font-semibold"> {"正式环境"->React.string} </span>
         </div>
       </RenderIf>
     </>
@@ -36,7 +36,11 @@ module TestMode = {
           className="bg-nd_orange-100 px-4 py-[6px] rounded-br-md rounded-bl-md w-fit flex gap-2 items-center">
           <Icon name="nd-toast-info" size=14 customIconColor="text-nd_yellow-200 text-fs-12" />
           <p className="text-nd_yellow-200 text-base leading-5 font-medium text-nowrap">
-            {"You're in Test Mode"->React.string}
+            {(
+              DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
+                ? "当前为测试环境"
+                : "You're in Test Mode"
+            )->React.string}
           </p>
           <GetProductionAccess />
         </div>

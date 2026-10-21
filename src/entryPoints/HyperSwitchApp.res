@@ -266,9 +266,7 @@ let make = () => {
                       <ErrorBoundary key={`${orgId}:${merchantId}:${profileId}`}>
                         {switch (activeProduct, url.path->urlPath) {
                         | (_, path) if !DashboardAccess.canVisit(roleId, path) =>
-                          <UnauthorizedPage
-                            message="This page is managed by your platform administrator."
-                          />
+                          <UnauthorizedPage message="此页面由平台管理员管理。" />
                         | (_, list{"platform"}) => <PlatformManagement />
                         | (_, list{"home", ..._})
                         | (_, list{"v2", "home"}) if isCollectionMerchant =>
@@ -326,7 +324,10 @@ let make = () => {
                     setShowModal={setShowFeedbackModal}
                   />
                 </RenderIf>
-                <RenderIf condition={!featureFlagDetails.isLiveMode}>
+                <RenderIf
+                  condition={!featureFlagDetails.isLiveMode &&
+                  !DashboardAccess.isPlatformRole(roleId) &&
+                  !isCollectionMerchant}>
                   <ProdIntentForm />
                 </RenderIf>
               </PageLoaderWrapper>

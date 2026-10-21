@@ -6,15 +6,15 @@ let make = () => {
   let {roleId} = getResolvedUserInfo()
   let {merchantId} = getCommonSessionDetails()
   let title = DashboardAccess.isCollectionRole(roleId)
-    ? "Merchant dashboard"
+    ? "商户中心"
     : DashboardAccess.isPlatformRole(roleId)
-    ? "Platform administration"
+    ? "平台管理"
     : "Control Center"
 
-  <div dataTestId="dashboard-identity" className="flex flex-col gap-1 border-b pb-3">
-    <span className="text-sm font-semibold"> {title->React.string} </span>
-    <span className="text-xs text-nd_gray-500">
-      {`Current merchant: ${merchantId}`->React.string}
-    </span>
+  <div
+    dataTestId="dashboard-identity"
+    className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+    <span className="text-lg font-semibold text-slate-800"> {title->React.string} </span>
+    <span className="text-sm text-slate-500"> {`当前商户：${merchantId}`->React.string} </span>
   </div>
 }

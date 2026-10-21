@@ -144,6 +144,7 @@ let make = () => {
   let {profileId, version} = React.useContext(
     UserInfoProvider.defaultContext,
   ).getCommonSessionDetails()
+  let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
   let profileList = Recoil.useRecoilValueFromAtom(HyperswitchAtom.profileListAtom)
   let (showSwitchingProfile, setShowSwitchingProfile) = React.useState(_ => false)
   let (arrow, setArrow) = React.useState(_ => false)
@@ -226,7 +227,12 @@ let make = () => {
       searchable=true
       customStyle="w-fit "
       baseComponent={<ListBaseComp
-        user={#Profile} heading="Profile" subHeading={currentOMPName(profileList, profileId)} arrow
+        user={#Profile}
+        heading={DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
+          ? "业务配置"
+          : "Profile"}
+        subHeading={currentOMPName(profileList, profileId)}
+        arrow
       />}
       bottomComponent={!isCurrentMerchantPlatform
         ? <AddNewOMPButton user=#Profile setShowModal customStyle addItemBtnStyle />

@@ -38,10 +38,7 @@ let make = () => {
       let result = await get(endpoint)
       setRows(_ => result->getArrayFromJson([]))
     } catch {
-    | _ =>
-      setMessage(_ =>
-        "Unable to load channel limits. Check platform access and whether the service is enabled."
-      )
+    | _ => setMessage(_ => "无法加载渠道限额，请检查平台权限与服务状态。")
     }
   }
   React.useEffect0(() => {
@@ -54,9 +51,7 @@ let make = () => {
       decimals > CurrencyUtils.getAmountPrecisionDigits(currency) ||
         !Js.Re.test_(%re("/^(0|[1-9][0-9]{0,9})(\.[0-9]{1,4})?$/"), amount)
     ) {
-      setMessage(_ =>
-        "Enter an amount with the correct number of decimal places for this currency."
-      )
+      setMessage(_ => "请输入金额，并符合该币种的小数位要求。")
     } else {
       setBusy(_ => true)
       try {
@@ -78,46 +73,51 @@ let make = () => {
           ->Dict.fromArray
           ->JSON.Encode.object
         let _ = await update(endpoint, body, Fetch.Post)
-        setMessage(_ => "Channel limit saved.")
+        setMessage(_ => "每日限额已保存。")
         await load()
       } catch {
       | _ =>
         setMessage(_ =>
-          "Unable to save. Verify the merchant, channel, currency, timezone and shared pool."
+          "保存失败，请检查商户、渠道、币种、时区及共享额度池。"
         )
       }
       setBusy(_ => false)
     }
   }
-  <section dataTestId="channel-daily-limits" className="border rounded-lg p-5 flex flex-col gap-4">
-    <h2 className="text-xl font-semibold"> {"Channel daily limits"->React.string} </h2>
-    <p>
-      {"Limits include pending payments. Channels sharing a pool share its daily allowance. Changing a shared pool affects every linked channel."->React.string}
+  <section
+    dataTestId="channel-daily-limits"
+    className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm flex flex-col gap-4">
+    <h2 className="text-xl font-semibold text-slate-800"> {"渠道每日限额"->React.string} </h2>
+    <p className="text-sm text-slate-600">
+      {"待处理交易也占用额度。同一额度池下的渠道共享每日限额；修改额度池会影响所有关联渠道。"->React.string}
     </p>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <Field label="Merchant ID" value=merchant onChange={v => setMerchant(_ => v)} />
-      <Field label="Channel account ID" value=channel onChange={v => setChannel(_ => v)} />
+      <Field label="商户 ID" value=merchant onChange={v => setMerchant(_ => v)} />
+      <Field label="渠道账户 ID" value=channel onChange={v => setChannel(_ => v)} />
       <Field
-        label="Shared pool ID"
+        label="共享额度池 ID"
         value=pool
         onChange={v => setPool(_ => v)}
-        placeholder="Use a unique name for an independent channel"
+        placeholder="独立渠道请使用唯一名称"
       />
-      <Field label="Currency" value=currency onChange={v => setCurrency(_ => v)} />
+      <Field label="币种" value=currency onChange={v => setCurrency(_ => v)} />
       <Field
-        label="Timezone"
+        label="统计时区"
         value=timezone
         onChange={v => setTimezone(_ => v)}
         placeholder="Asia/Shanghai"
       />
-      <Field label="Daily amount" value=amount onChange={v => setAmount(_ => v)} />
+      <Field label="每日限额" value=amount onChange={v => setAmount(_ => v)} />
     </div>
     <label>
       <input type_="checkbox" checked=enabled onChange={_ => setEnabled(v => !v)} />
-      {" Channel enabled"->React.string}
+      {" 启用此渠道"->React.string}
     </label>
-    <button disabled=busy className="border rounded px-4 py-2" onClick={_ => save()->ignore}>
-      {"Save daily limit"->React.string}
+    <button
+      disabled=busy
+      className="self-start rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+      onClick={_ => save()->ignore}>
+      {"保存每日限额"->React.string}
     </button>
     <p role="status"> {message->React.string} </p>
     {rows

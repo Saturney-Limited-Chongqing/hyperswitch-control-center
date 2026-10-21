@@ -643,6 +643,57 @@ let make = (
   let usePortalNavigation =
     DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
   let devSidebarV2 = devSidebarV2 && !usePortalNavigation
+  let isPlatformPortal = DashboardAccess.isPlatformRole(roleId)
+  let (showAdvanced, setShowAdvanced) = React.useState(_ => false)
+  let compactPlatformSidebars = [
+    Link({name: "商户管理", icon: "nd-user", link: "/platform", access: Access}),
+    Section({
+      name: "交易管理",
+      icon: "nd-operations",
+      showSection: true,
+      links: [
+        SubLevelLink({name: "交易订单", link: "/payments", access: Access, searchOptions: []}),
+        SubLevelLink({name: "退款记录", link: "/refunds", access: Access, searchOptions: []}),
+        SubLevelLink({name: "争议处理", link: "/disputes", access: Access, searchOptions: []}),
+      ],
+    }),
+    Section({
+      name: "渠道与规则",
+      icon: "nd-settings",
+      showSection: true,
+      links: [
+        SubLevelLink({
+          name: "支付渠道",
+          link: "/connectors",
+          access: Access,
+          searchOptions: [],
+        }),
+        SubLevelLink({name: "路由规则", link: "/routing", access: Access, searchOptions: []}),
+      ],
+    }),
+    Section({
+      name: "平台设置",
+      icon: "nd-analytics",
+      showSection: true,
+      links: [
+        SubLevelLink({
+          name: "收款分析",
+          link: "/analytics-payments",
+          access: Access,
+          searchOptions: [],
+        }),
+        SubLevelLink({
+          name: "API 密钥",
+          link: "/developer-api-keys",
+          access: Access,
+          searchOptions: [],
+        }),
+        SubLevelLink({name: "回调通知", link: "/webhooks", access: Access, searchOptions: []}),
+        SubLevelLink({name: "用户管理", link: "/users", access: Access, searchOptions: []}),
+      ],
+    }),
+  ]
+  let visibleSidebars = isPlatformPortal && !showAdvanced ? compactPlatformSidebars : sidebars
 
   let merchantList = Recoil.useRecoilValueFromAtom(HyperswitchAtom.merchantListAtom)
   let (openItem, setOpenItem) = React.useState(_ => "")
@@ -749,13 +800,20 @@ let make = (
           <RenderIf condition={!isInternalUser}>
             <SidebarSwitch isSidebarExpanded />
           </RenderIf>
+          <RenderIf condition={isPlatformPortal}>
+            <button
+              className="mx-4 mt-4 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
+              onClick={_ => setShowAdvanced(value => !value)}>
+              {(showAdvanced ? "返回简洁中台" : "查看高级功能")->React.string}
+            </button>
+          </RenderIf>
           <RenderIf condition={!devSidebarV2 || isInternalUser}>
             <div
               className="h-full overflow-y-scroll transition-transform duration-1000 overflow-x-hidden sidebar-scrollbar mt-4"
               style={height: `calc(100vh - ${verticalOffset})`}>
               <style> {React.string(sidebarScrollbarCss)} </style>
               <div className="flex flex-col gap-2 p-2.5 pt-0">
-                {sidebars
+                {visibleSidebars
                 ->Array.mapWithIndex((tabInfo, index) => {
                   switch tabInfo {
                   | RemoteLink(record)
@@ -812,11 +870,12 @@ let make = (
                 })
                 ->React.array}
               </div>
-              <RenderIf condition={productSiebars->Array.length > 0}>
+              <RenderIf
+                condition={productSiebars->Array.length > 0 && (!isPlatformPortal || showAdvanced)}>
                 <div className="flex flex-col gap-2 p-2.5">
                   <div
                     className={`px-3 pt-6 pb-2 text-nd_gray-400 tracking-widest ${body.sm.semibold}`}>
-                    {React.string("Other modular services"->String.toUpperCase)}
+                    {React.string("其他模块")}
                   </div>
                   {productSiebars
                   ->Array.mapWithIndex((tabInfo, index) => {

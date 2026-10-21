@@ -301,39 +301,86 @@ let useGetSidebarValuesForCurrentActive = () => {
   let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
   if DashboardAccess.isCollectionRole(roleId) {
     [
-      Link({name: "Overview", icon: "nd-home", link: "/home", access: Access}),
+      Link({name: "商户概览", icon: "nd-home", link: "/home", access: Access}),
       Section({
-        name: "Collections",
+        name: "收款管理",
         icon: "nd-operations",
         showSection: true,
         links: [
-          payments(userHasResourceAccess),
-          refunds(userHasResourceAccess),
-          disputes(userHasResourceAccess),
-          customers(userHasResourceAccess),
-          paymentLinks(userHasResourceAccess),
+          SubLevelLink({
+            name: "交易订单",
+            link: "/payments",
+            access: userHasResourceAccess(~resourceAccess=Payment),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "退款记录",
+            link: "/refunds",
+            access: userHasResourceAccess(~resourceAccess=Refund),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "争议处理",
+            link: "/disputes",
+            access: userHasResourceAccess(~resourceAccess=Dispute),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "客户资料",
+            link: "/customers",
+            access: userHasResourceAccess(~resourceAccess=Customer),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "收款链接",
+            link: "/payment-links",
+            access: userHasResourceAccess(~resourceAccess=Payment),
+            searchOptions: [],
+          }),
         ],
       }),
       Section({
-        name: "Reports",
+        name: "报表统计",
         icon: "nd-analytics",
         showSection: true,
-        links: [paymentAnalytcis(~userHasResourceAccess)],
+        links: [
+          SubLevelLink({
+            name: "收款分析",
+            link: "/analytics-payments",
+            access: userHasResourceAccess(~resourceAccess=Analytics),
+            searchOptions: [],
+          }),
+        ],
       }),
       Section({
-        name: "Developer settings",
+        name: "账户与接入",
         icon: "nd-settings",
         showSection: true,
         links: [
-          apiKeys(userHasResourceAccess),
-          webhooks(userHasResourceAccess),
-          userManagement(userHasResourceAccess),
+          SubLevelLink({
+            name: "API 密钥",
+            link: "/developer-api-keys",
+            access: userHasResourceAccess(~resourceAccess=ApiKey),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "回调通知",
+            link: "/webhooks",
+            access: userHasResourceAccess(~resourceAccess=WebhookEvent),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "用户管理",
+            link: "/users",
+            access: userHasResourceAccess(~resourceAccess=User),
+            searchOptions: [],
+          }),
         ],
       }),
     ]
   } else {
     let portalLinks = DashboardAccess.isPlatformRole(roleId)
-      ? [Link({name: "Merchant management", icon: "nd-user", link: "/platform", access: Access})]
+      ? [Link({name: "商户管理", icon: "nd-user", link: "/platform", access: Access})]
       : []
     portalLinks->Array.concat(defaultSidebar)->Array.concat(sidebarValuesForProduct)
   }

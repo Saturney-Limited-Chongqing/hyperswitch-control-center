@@ -94,7 +94,7 @@ module ListBaseComp = {
             ? "rotate-0"
             : "rotate-180"} transition duration-[250ms] opacity-70 ${secondaryTextColor}`
 
-    let headingText = isPlatform ? "Platform Merchant Account" : "Merchant Account"
+    let headingText = isPlatform ? "平台商户账户" : "商户账户"
 
     let openPlatformModal = e => {
       e->ReactEvent.Mouse.stopPropagation
