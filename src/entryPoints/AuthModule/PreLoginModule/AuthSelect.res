@@ -62,11 +62,14 @@ let make = (~setSelectedAuthId) => {
         onClick={_ => handleTerminateSSO(method.id)->ignore}
       />
     | (OPEN_ID_CONNECT, #Rauthy)
+    | (OPEN_ID_CONNECT, #Logto)
     | (OPEN_ID_CONNECT, #Okta)
     | (OPEN_ID_CONNECT, #Google)
     | (OPEN_ID_CONNECT, #Github) =>
       <Button
-        text={`Login with ${(authMethodName :> string)}`}
+        text={authMethodName == #Logto
+          ? "使用 Logto 登录"
+          : `Login with ${(authMethodName :> string)}`}
         buttonType={PrimaryOutline}
         buttonSize={Large}
         customButtonStyle="!w-full"

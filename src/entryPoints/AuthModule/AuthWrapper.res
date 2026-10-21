@@ -156,11 +156,14 @@ let make = (~children) => {
     let authMethodName = method.auth_method.name
     switch (authMethodType, authMethodName) {
     | (OPEN_ID_CONNECT, #Rauthy)
+    | (OPEN_ID_CONNECT, #Logto)
     | (OPEN_ID_CONNECT, #Okta)
     | (OPEN_ID_CONNECT, #Google)
     | (OPEN_ID_CONNECT, #Github) =>
       <Button
-        text={`Continue with ${(authMethodName :> string)}`}
+        text={authMethodName == #Logto
+          ? "使用 Logto 登录"
+          : `Continue with ${(authMethodName :> string)}`}
         buttonType={PrimaryOutline}
         customButtonStyle="!w-full"
         onClick={_ => handleLoginWithSso(method.id)}
