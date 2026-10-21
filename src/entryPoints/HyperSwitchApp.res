@@ -38,6 +38,8 @@ let make = () => {
   )
   let {roleId} = getResolvedUserInfo()
   let isCollectionMerchant = DashboardAccess.isCollectionRole(roleId)
+  let isPlatformAdmin = DashboardAccess.isPlatformRole(roleId)
+  let (showLegacyPlatform, setShowLegacyPlatform) = React.useState(_ => false)
   let {orgId, merchantId, profileId, version} = getCommonSessionDetails()
   let sessionKey = `${orgId}:${merchantId}:${profileId}`
   let (loadedSession, setLoadedSession) = React.useState(_ => "")
@@ -156,7 +158,12 @@ let make = () => {
   }
 
   <>
-    <div>
+    <div
+      className={isPlatformAdmin || isCollectionMerchant
+        ? `rainbow-portal ${isPlatformAdmin && !showLegacyPlatform
+              ? "rainbow-platform-compact"
+              : ""}`
+        : ""}>
       {switch dashboardPageState {
       | #HOME =>
         <div className="relative">
@@ -164,18 +171,23 @@ let make = () => {
           <div className={`h-screen flex flex-col`}>
             <div className="flex relative  h-screen ">
               <RenderIf condition={sessionReady && screenState === Success}>
-                <Sidebar
-                  path=url.path
-                  sidebars={hyperSwitchAppSidebars}
-                  productSiebars={isCollectionMerchant ? [] : productSidebars}
-                />
+                {isPlatformAdmin && !showLegacyPlatform
+                  ? <RainbowPlatformNav onAdvanced={() => setShowLegacyPlatform(_ => true)} />
+                  : <Sidebar
+                      path=url.path
+                      sidebars={hyperSwitchAppSidebars}
+                      productSiebars={isCollectionMerchant ? [] : productSidebars}
+                    />}
               </RenderIf>
               <PageLoaderWrapper
                 screenState={sessionReady ? screenState : PageLoaderWrapper.Loading}
                 sectionHeight="!h-screen w-full"
                 showLogoutButton=true>
                 <div
-                  className="flex relative flex-col flex-1 bg-hyperswitch_background dark:bg-black overflow-scroll md:overflow-x-hidden">
+                  className={`rainbow-content flex relative flex-col flex-1 bg-hyperswitch_background dark:bg-black overflow-scroll md:overflow-x-hidden ${isPlatformAdmin &&
+                    !showLegacyPlatform
+                      ? "rainbow-platform-main"
+                      : ""}`}>
                   <div className="w-full max-w-fixedPageWidth md:px-12 px-5 pt-3">
                     <Navbar
                       headerActions={<div className="relative flex space-around gap-4 my-2 ">
@@ -262,11 +274,19 @@ let make = () => {
                       className={isDecisionEngineWorkspace
                         ? "flex flex-col min-h-full"
                         : "p-6 md:px-12 md:py-8 flex flex-col gap-8 max-w-fixedPageWidth min-h-full"}>
+                      <RenderIf condition={isPlatformAdmin && showLegacyPlatform}>
+                        <button
+                          className="self-start rounded border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+                          onClick={_ => setShowLegacyPlatform(_ => false)}>
+                          {"返回中文中台"->React.string}
+                        </button>
+                      </RenderIf>
                       <DashboardPortal />
                       <ErrorBoundary key={`${orgId}:${merchantId}:${profileId}`}>
                         {switch (activeProduct, url.path->urlPath) {
                         | (_, path) if !DashboardAccess.canVisit(roleId, path) =>
                           <UnauthorizedPage message="此页面由平台管理员管理。" />
+                        | (_, list{"platform", "channel-limits"}) => <ChannelDailyLimits />
                         | (_, list{"platform"}) => <PlatformManagement />
                         | (_, list{"home", ..._})
                         | (_, list{"v2", "home"}) if isCollectionMerchant =>

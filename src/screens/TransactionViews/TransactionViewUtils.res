@@ -176,6 +176,25 @@ let getViewsDisplayName = (view: viewTypes) => {
   }
 }
 
+let getViewsDisplayNameZh = (view: viewTypes) => {
+  switch view {
+  | All => "全部"
+  | Succeeded => "成功"
+  | Failed => "失败"
+  | Dropoffs => "未完成"
+  | Cancelled => "已取消"
+  | Pending => "处理中"
+  | Expired => "已过期"
+  | Reversed => "已撤销"
+  | RequiresCapture => "待捕获"
+  | FirstAttemptSuccess => "首次成功"
+  | RetrySuccess => "重试成功"
+  | Refunded => "已退款"
+  | Disputed => "争议中"
+  | _ => ""
+  }
+}
+
 let getViewTypeFromString = (view, entity) => {
   switch entity {
   | Orders =>

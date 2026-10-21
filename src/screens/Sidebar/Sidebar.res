@@ -643,58 +643,6 @@ let make = (
   let usePortalNavigation =
     DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
   let devSidebarV2 = devSidebarV2 && !usePortalNavigation
-  let isPlatformPortal = DashboardAccess.isPlatformRole(roleId)
-  let (showAdvanced, setShowAdvanced) = React.useState(_ => false)
-  let compactPlatformSidebars = [
-    Link({name: "商户管理", icon: "nd-user", link: "/platform", access: Access}),
-    Section({
-      name: "交易管理",
-      icon: "nd-operations",
-      showSection: true,
-      links: [
-        SubLevelLink({name: "交易订单", link: "/payments", access: Access, searchOptions: []}),
-        SubLevelLink({name: "退款记录", link: "/refunds", access: Access, searchOptions: []}),
-        SubLevelLink({name: "争议处理", link: "/disputes", access: Access, searchOptions: []}),
-      ],
-    }),
-    Section({
-      name: "渠道与规则",
-      icon: "nd-settings",
-      showSection: true,
-      links: [
-        SubLevelLink({
-          name: "支付渠道",
-          link: "/connectors",
-          access: Access,
-          searchOptions: [],
-        }),
-        SubLevelLink({name: "路由规则", link: "/routing", access: Access, searchOptions: []}),
-      ],
-    }),
-    Section({
-      name: "平台设置",
-      icon: "nd-analytics",
-      showSection: true,
-      links: [
-        SubLevelLink({
-          name: "收款分析",
-          link: "/analytics-payments",
-          access: Access,
-          searchOptions: [],
-        }),
-        SubLevelLink({
-          name: "API 密钥",
-          link: "/developer-api-keys",
-          access: Access,
-          searchOptions: [],
-        }),
-        SubLevelLink({name: "回调通知", link: "/webhooks", access: Access, searchOptions: []}),
-        SubLevelLink({name: "用户管理", link: "/users", access: Access, searchOptions: []}),
-      ],
-    }),
-  ]
-  let visibleSidebars = isPlatformPortal && !showAdvanced ? compactPlatformSidebars : sidebars
-
   let merchantList = Recoil.useRecoilValueFromAtom(HyperswitchAtom.merchantListAtom)
   let (openItem, setOpenItem) = React.useState(_ => "")
   let expandedSections = [activeProduct->getProductDisplayName]
@@ -732,7 +680,7 @@ let make = (
   let expansionClass = !isSidebarExpanded ? "-translate-x-full" : ""
 
   let sidebarMaxWidth = isMobileView ? "w-screen" : "w-max"
-  let sidebarCollapseWidth = showSideBar ? "356px" : "56px"
+  let sidebarCollapseWidth = showSideBar ? usePortalNavigation ? "300px" : "356px" : "56px"
   let sidebarContainerClassWidth = isMobileView ? "0px" : `${sidebarCollapseWidth}`
 
   let transformClass = "transform md:translate-x-0 transition"
@@ -770,7 +718,10 @@ let make = (
   let isThemeSelected = linkSelectionCheck(firstPart, "/theme")
   let isUsersSelected = linkSelectionCheck(firstPart, "/users")
 
-  <div className={`${backgroundColor.sidebarNormal} flex group relative `}>
+  <div
+    className={`${backgroundColor.sidebarNormal} flex group relative ${usePortalNavigation
+        ? "rainbow-portal-sidebar"
+        : ""}`}>
     <div
       ref={sideBarRef->ReactDOM.Ref.domRef}
       className={`flex h-full flex-col transition-all ease-in-out duration-200 relative inset-0`}
@@ -780,11 +731,15 @@ let make = (
     />
     <div
       className={`absolute z-30 h-screen flex ${transformClass} duration-300 ease-in-out ${sidebarMaxWidth} ${expansionClass}`}>
-      <OrgSidebar />
+      <RenderIf condition={!usePortalNavigation}>
+        <OrgSidebar />
+      </RenderIf>
       <RenderIf condition={showSideBar}>
         <div
           ref={sideBarRef->ReactDOM.Ref.domRef}
-          className={`${backgroundColor.sidebarNormal} justify-between flex h-full flex-col transition-all duration-100 border-r ${borderColor} relative inset-0`}
+          className={`${backgroundColor.sidebarNormal} justify-between flex h-full flex-col transition-all duration-100 border-r ${borderColor} relative inset-0 ${usePortalNavigation
+              ? "rainbow-portal-sidebar-panel"
+              : ""}`}
           style={width: sidebarWidth}>
           <RenderIf condition={isMobileView}>
             <div className="flex align-center mt-4 mb-6 ml-1 pl-3 pr-4 gap-5 cursor-default">
@@ -800,20 +755,13 @@ let make = (
           <RenderIf condition={!isInternalUser}>
             <SidebarSwitch isSidebarExpanded />
           </RenderIf>
-          <RenderIf condition={isPlatformPortal}>
-            <button
-              className="mx-4 mt-4 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
-              onClick={_ => setShowAdvanced(value => !value)}>
-              {(showAdvanced ? "返回简洁中台" : "查看高级功能")->React.string}
-            </button>
-          </RenderIf>
           <RenderIf condition={!devSidebarV2 || isInternalUser}>
             <div
               className="h-full overflow-y-scroll transition-transform duration-1000 overflow-x-hidden sidebar-scrollbar mt-4"
               style={height: `calc(100vh - ${verticalOffset})`}>
               <style> {React.string(sidebarScrollbarCss)} </style>
               <div className="flex flex-col gap-2 p-2.5 pt-0">
-                {visibleSidebars
+                {sidebars
                 ->Array.mapWithIndex((tabInfo, index) => {
                   switch tabInfo {
                   | RemoteLink(record)
@@ -870,8 +818,7 @@ let make = (
                 })
                 ->React.array}
               </div>
-              <RenderIf
-                condition={productSiebars->Array.length > 0 && (!isPlatformPortal || showAdvanced)}>
+              <RenderIf condition={productSiebars->Array.length > 0}>
                 <div className="flex flex-col gap-2 p-2.5">
                   <div
                     className={`px-3 pt-6 pb-2 text-nd_gray-400 tracking-widest ${body.sm.semibold}`}>

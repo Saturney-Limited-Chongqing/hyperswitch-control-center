@@ -3,6 +3,8 @@ let p1MediumTextStyle = HSwitchUtils.getTextClass((P1, Medium))
 module RequestConnector = {
   @react.component
   let make = (~connectorListSorted, ~setShowModal, ~showRequestConnectorBtn=true) => {
+    let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
+    let isChinesePortal = DashboardAccess.isPlatformRole(roleId)
     <RenderIf condition={connectorListSorted->Array.length === 0 && showRequestConnectorBtn}>
       <div
         className="flex flex-col gap-6 items-center justify-center w-full bg-white rounded-lg border p-8">
@@ -10,10 +12,16 @@ module RequestConnector = {
           <img alt="notfound" src={`${LogicUtils.useUrlPrefix()}/notfound.svg`} />
         </div>
         <p className="jp-grey-700 opacity-50">
-          {"Uh-oh! Looks like we couldn't find the processor you were searching for."->React.string}
+          {(
+            isChinesePortal
+              ? "没有找到符合条件的支付渠道。"
+              : "Uh-oh! Looks like we couldn't find the processor you were searching for."
+          )->React.string}
         </p>
         <Button
-          text={"Request a processor"} buttonType=Primary onClick={_ => setShowModal(_ => true)}
+          text={isChinesePortal ? "申请新渠道" : "Request a processor"}
+          buttonType=Primary
+          onClick={_ => setShowModal(_ => true)}
         />
       </div>
     </RenderIf>
@@ -24,6 +32,8 @@ module CantFindProcessor = {
   @react.component
   let make = (~showRequestConnectorBtn, ~setShowModal) => {
     let {userHasAccess, hasAnyGroupAccess} = GroupACLHooks.useUserGroupACLHook()
+    let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
+    let isChinesePortal = DashboardAccess.isPlatformRole(roleId)
 
     <RenderIf condition={showRequestConnectorBtn}>
       <ACLButton
@@ -32,7 +42,7 @@ module CantFindProcessor = {
           userHasAccess(~groupAccess=MerchantDetailsManage),
           userHasAccess(~groupAccess=AccountManage),
         )}
-        text="Request a Processor"
+        text={isChinesePortal ? "申请新渠道" : "Request a Processor"}
         buttonType={Secondary}
         buttonSize={Large}
         textStyle="text-jp-gray-900"
@@ -64,6 +74,8 @@ let make = (
   open ConnectorUtils
   let mixpanelEvent = MixpanelHook.useSendEvent()
   let {userHasAccess} = GroupACLHooks.useUserGroupACLHook()
+  let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
+  let isChinesePortal = DashboardAccess.isPlatformRole(roleId)
   let featureFlagDetails = HyperswitchAtom.featureFlagAtom->Recoil.useRecoilValueFromAtom
   let url = RescriptReactRouter.useUrl()
   let urlPathArray = url.path->List.toArray
@@ -121,7 +133,7 @@ let make = (
               type_="text"
               value=searchedConnector
               onChange=handleSearch
-              placeholder="Search a processor"
+              placeholder={isChinesePortal ? "搜索支付渠道" : "Search a processor"}
               className={`rounded-md px-4 py-2 focus:outline-none w-1/3 border`}
               id="search-processor"
             />
@@ -140,7 +152,7 @@ let make = (
                 className="text-jp-gray-900 fill-opacity-50 dark:jp-gray-text_darktheme"
               />,
             )}
-            text="Connect a Dummy Processor"
+            text={isChinesePortal ? "连接模拟渠道" : "Connect a Dummy Processor"}
             buttonType={Secondary}
             buttonSize={Large}
             textStyle="text-jp-gray-900"
@@ -174,7 +186,7 @@ let make = (
               </p>
               <ACLButton
                 authorization={userHasAccess(~groupAccess=ConnectorsManage)}
-                text="Connect"
+                text={isChinesePortal ? "连接" : "Connect"}
                 onClick={_ => handleClick(connectorName)}
                 buttonType={Secondary}
                 buttonSize={Small}
@@ -209,7 +221,7 @@ let make = (
     <RenderIf condition={showAllConnectors}>
       <div className="flex flex-col gap-4">
         {connectorListFiltered->descriptedConnectors(
-          ~heading="Connect a new processor",
+          ~heading={isChinesePortal ? "连接新渠道" : "Connect a new processor"},
           ~showRequestConnectorBtn,
           ~showDummyConnectorButton,
           (),
@@ -217,7 +229,7 @@ let make = (
       </div>
       <RenderIf condition={showModal}>
         <HSwitchFeedBackModal
-          modalHeading="Request a processor"
+          modalHeading={isChinesePortal ? "申请新渠道" : "Request a processor"}
           setShowModal
           showModal
           modalType={RequestConnectorModal}

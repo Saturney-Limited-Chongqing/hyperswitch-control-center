@@ -76,7 +76,12 @@ test("two merchants receive distinct collection dashboards and cannot open admin
       }),
     ).toHaveCount(0);
 
-    for (const route of ["/connectors", "/routing", "/platform"]) {
+    for (const route of [
+      "/connectors",
+      "/routing",
+      "/platform",
+      "/platform/channel-limits",
+    ]) {
       await page.goto(managementPath(home, route));
       await expect(page.getByText("此页面由平台管理员管理。")).toBeVisible({
         timeout: 60000,
@@ -102,7 +107,7 @@ test("platform administrator can see both merchants and open the management hub"
     "平台管理",
     { timeout: 60000 },
   );
-  await page.getByText("商户管理", { exact: true }).first().click();
+  await page.getByText("平台首页", { exact: true }).click();
   const hub = page.getByTestId("platform-management");
   await expect(hub).toBeVisible();
   for (const merchant of fixtures.merchants) {
@@ -147,9 +152,15 @@ test("platform administrator configures a channel daily allowance", async ({
     "平台管理",
     { timeout: 60000 },
   );
-  await page.getByText("商户管理", { exact: true }).first().click();
+  await page.getByText("平台首页", { exact: true }).click();
   const panel = page.getByTestId("channel-daily-limits");
   await expect(panel).toBeVisible();
+  const navigation = page.getByRole("navigation", { name: "平台管理导航" });
+  await navigation.getByRole("button", { name: "支付接口" }).click();
+  await navigation
+    .getByRole("button", { name: "每日限额", exact: true })
+    .click();
+  await expect(page.getByTestId("channel-daily-limits")).toBeVisible();
   // Existing bindings are immutable: reuse the current test account's pool.
   const apiBase = (fixtures as unknown as { base_url: string }).base_url;
   const result = await page.request.get(apiBase + "/configs/channel-limits", {

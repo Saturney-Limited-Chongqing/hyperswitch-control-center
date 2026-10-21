@@ -1,4 +1,5 @@
 %%raw(`require("tailwindcss/tailwind.css")`)
+%%raw(`require("./rainbow-portal.css")`)
 
 module ContextWrapper = {
   @react.component

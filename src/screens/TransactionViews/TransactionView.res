@@ -10,6 +10,11 @@ module TransactionViewCard = {
   ) => {
     open TransactionViewUtils
     open Typography
+    let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
+    let label =
+      DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
+        ? view->getViewsDisplayNameZh
+        : view->getViewsDisplayName
 
     let textClass = `${body.md.semibold} ${isActiveView ? "text-primary" : "text-nd_gray-700"}`
     let countTextClass = `${body.md.semibold} ${isActiveView ? "text-primary" : "text-nd_gray-900"}`
@@ -23,9 +28,7 @@ module TransactionViewCard = {
           <NewFeatureTag description=newCardDescription />
         </div>
       </RenderIf>
-      <p className={`${textClass} truncate ${isNewCard ? "pr-9" : ""}`}>
-        {view->getViewsDisplayName->React.string}
-      </p>
+      <p className={`${textClass} truncate ${isNewCard ? "pr-9" : ""}`}> {label->React.string} </p>
       <RenderIf condition={!(count->LogicUtils.isEmptyString)}>
         <p className={countTextClass}> {count->React.string} </p>
       </RenderIf>

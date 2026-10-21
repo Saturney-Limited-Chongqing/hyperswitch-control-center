@@ -301,14 +301,39 @@ let useGetSidebarValuesForCurrentActive = () => {
   let {roleId} = React.useContext(UserInfoProvider.defaultContext).getResolvedUserInfo()
   if DashboardAccess.isCollectionRole(roleId) {
     [
-      Link({name: "商户概览", icon: "nd-home", link: "/home", access: Access}),
+      Link({name: "用户中心", icon: "nd-home", link: "/home", access: Access}),
       Section({
-        name: "收款管理",
+        name: "个人资料",
+        icon: "nd-user",
+        showSection: true,
+        links: [
+          SubLevelLink({
+            name: "API 信息",
+            link: "/developer-api-keys",
+            access: userHasResourceAccess(~resourceAccess=ApiKey),
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "账户资料",
+            link: "/account-settings/profile",
+            access: Access,
+            searchOptions: [],
+          }),
+          SubLevelLink({
+            name: "回调通知",
+            link: "/webhooks",
+            access: userHasResourceAccess(~resourceAccess=WebhookEvent),
+            searchOptions: [],
+          }),
+        ],
+      }),
+      Section({
+        name: "查询",
         icon: "nd-operations",
         showSection: true,
         links: [
           SubLevelLink({
-            name: "交易订单",
+            name: "订单记录",
             link: "/payments",
             access: userHasResourceAccess(~resourceAccess=Payment),
             searchOptions: [],
@@ -320,13 +345,13 @@ let useGetSidebarValuesForCurrentActive = () => {
             searchOptions: [],
           }),
           SubLevelLink({
-            name: "争议处理",
+            name: "交易争议",
             link: "/disputes",
             access: userHasResourceAccess(~resourceAccess=Dispute),
             searchOptions: [],
           }),
           SubLevelLink({
-            name: "客户资料",
+            name: "客户记录",
             link: "/customers",
             access: userHasResourceAccess(~resourceAccess=Customer),
             searchOptions: [],
@@ -340,7 +365,7 @@ let useGetSidebarValuesForCurrentActive = () => {
         ],
       }),
       Section({
-        name: "报表统计",
+        name: "统计",
         icon: "nd-analytics",
         showSection: true,
         links: [
@@ -353,22 +378,10 @@ let useGetSidebarValuesForCurrentActive = () => {
         ],
       }),
       Section({
-        name: "账户与接入",
+        name: "成员管理",
         icon: "nd-settings",
         showSection: true,
         links: [
-          SubLevelLink({
-            name: "API 密钥",
-            link: "/developer-api-keys",
-            access: userHasResourceAccess(~resourceAccess=ApiKey),
-            searchOptions: [],
-          }),
-          SubLevelLink({
-            name: "回调通知",
-            link: "/webhooks",
-            access: userHasResourceAccess(~resourceAccess=WebhookEvent),
-            searchOptions: [],
-          }),
           SubLevelLink({
             name: "用户管理",
             link: "/users",

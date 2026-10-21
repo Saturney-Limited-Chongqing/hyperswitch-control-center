@@ -35,6 +35,7 @@ for (const role of [
   test(`${role}: direct management paths are denied`, () => {
     for (const url of [
       "/platform",
+      "/platform/channel-limits",
       "/connectors",
       "/connectors/new",
       "/routing",

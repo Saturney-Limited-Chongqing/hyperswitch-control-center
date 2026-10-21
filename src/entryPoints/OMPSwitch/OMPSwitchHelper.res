@@ -157,7 +157,7 @@ module ListBaseComp = {
             <p
               className="overflow-scroll text-nowrap text-sm font-medium text-nd_gray-500 whitespace-pre">
               <span className={`text-xs text-nd_gray-400 font-medium`}>
-                {"Profile :   "->React.string}
+                {`${heading}： `->React.string}
               </span>
               {React.string(subHeading)}
             </p>

@@ -28,7 +28,9 @@ let make = (~previewOnly=false) => {
   let {getCommonSessionDetails, getResolvedUserInfo, checkUserEntity} = React.useContext(
     UserInfoProvider.defaultContext,
   )
-  let {transactionEntity} = getResolvedUserInfo()
+  let {transactionEntity, roleId} = getResolvedUserInfo()
+  let isChinesePortal =
+    DashboardAccess.isCollectionRole(roleId) || DashboardAccess.isPlatformRole(roleId)
   let {merchantId, orgId, version} = getCommonSessionDetails()
 
   let {userHasResourceAccess} = GroupACLHooks.useUserGroupACLHook()
@@ -253,7 +255,7 @@ let make = (~previewOnly=false) => {
   let customUI =
     <NoDataFound
       customCssClass="my-6"
-      message="No results found"
+      message={isChinesePortal ? "暂无匹配订单" : "No results found"}
       renderType=ExtendDateUI
       handleClick=handleExtendDateButtonClick
     />
@@ -261,6 +263,8 @@ let make = (~previewOnly=false) => {
   let filtersUI = React.useMemo(() => {
     let searchPlaceholder = isAdvancedView
       ? "Search ID, email, card last 4..."
+      : isChinesePortal
+      ? "按支付订单号搜索"
       : "Search by payment ID"
     let searchBar =
       <SearchBarFilter
@@ -318,7 +322,7 @@ let make = (~previewOnly=false) => {
       }}
       version
     />
-  }, (searchText, version, isAdvancedView, devSavedViews, showSavedViews))
+  }, (searchText, version, isAdvancedView, devSavedViews, showSavedViews, isChinesePortal))
 
   let tableEntity = isAdvancedView
     ? openSearchOrderEntity(merchantId, orgId, ~devSortEnabled)
@@ -334,7 +338,11 @@ let make = (~previewOnly=false) => {
     <div
       className={`flex flex-col gap-4 md:gap-6 mx-auto h-full ${widthClass} ${heightClass} min-h-50-vh`}>
       <div className="flex flex-wrap justify-between gap-3 items-start">
-        <PageUtils.PageHeading title="Payment Operations" subTitle="" customTitleStyle />
+        <PageUtils.PageHeading
+          title={isChinesePortal ? "订单管理" : "Payment Operations"}
+          subTitle=""
+          customTitleStyle
+        />
         <div
           className="flex flex-nowrap justify-end gap-2 items-center whitespace-nowrap overflow-x-auto no-scrollbar pr-px">
           <RenderIf condition={isAdvancedViewEnabled}>

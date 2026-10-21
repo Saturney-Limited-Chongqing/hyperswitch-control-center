@@ -1,0 +1,150 @@
+.rainbow-portal {
+  --portal-primary: #337ab7;
+  --portal-border: #dfe4ea;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #273142;
+}
+
+.rainbow-portal .rainbow-content {
+  background: #f5f7fa;
+}
+
+.rainbow-portal .rainbow-platform-main {
+  padding-top: 56px;
+}
+
+.rainbow-platform-topbar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid #dfe4ea;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
+  white-space: nowrap;
+}
+
+.rainbow-platform-brand {
+  margin-right: 20px;
+  color: #2b3a4c;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.rainbow-platform-topbar button {
+  height: 42px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #3c4b5b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rainbow-platform-topbar button:hover,
+.rainbow-platform-topbar button[aria-expanded="true"] {
+  background: #eef4fa;
+  color: #286090;
+}
+
+.rainbow-platform-menu {
+  position: relative;
+}
+
+.rainbow-platform-caret {
+  margin-left: 4px;
+  color: #8b98a7;
+}
+
+.rainbow-platform-dropdown {
+  position: absolute;
+  top: 47px;
+  left: 0;
+  min-width: 170px;
+  padding: 5px;
+  border: 1px solid #dfe4ea;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.rainbow-platform-dropdown button {
+  display: block;
+  width: 100%;
+  height: 36px;
+  text-align: left;
+}
+
+.rainbow-platform-topbar .rainbow-platform-advanced {
+  margin-left: auto;
+  color: #337ab7;
+}
+
+.rainbow-portal .rainbow-portal-sidebar,
+.rainbow-portal .rainbow-portal-sidebar-panel {
+  background: #263445 !important;
+  border-color: #34475f !important;
+}
+
+.rainbow-portal .rainbow-portal-sidebar-panel * {
+  color: #e5edf6 !important;
+}
+
+.rainbow-portal .rainbow-portal-sidebar-panel input,
+.rainbow-portal .rainbow-portal-sidebar-panel [role="option"],
+.rainbow-portal .rainbow-portal-sidebar-panel [role="option"] *,
+.rainbow-portal .rainbow-portal-sidebar-panel [role="dialog"],
+.rainbow-portal .rainbow-portal-sidebar-panel [role="dialog"] * {
+  color: #273142 !important;
+}
+
+.rainbow-portal .rainbow-portal-sidebar-panel a:hover,
+.rainbow-portal .rainbow-portal-sidebar-panel a:hover > div {
+  background: #344b66 !important;
+}
+
+.rainbow-portal .rainbow-portal-sidebar-panel [class*="bg-sidebar-hoverColor"] {
+  background: transparent !important;
+}
+
+.rainbow-portal .rainbow-portal-sidebar-panel > button {
+  background: #337ab7;
+  border-color: #286090;
+  border-radius: 4px;
+}
+
+.rainbow-portal [data-testid="dashboard-identity"],
+.rainbow-portal [data-testid="platform-management"] > div,
+.rainbow-portal [data-testid="collection-home"] > div,
+.rainbow-portal [data-testid="channel-daily-limits"] {
+  border-radius: 4px;
+  border-color: var(--portal-border);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+}
+
+.rainbow-portal [data-testid="platform-management"] button,
+.rainbow-portal [data-testid="channel-daily-limits"] button {
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .rainbow-platform-topbar {
+    gap: 0;
+    overflow-x: auto;
+    padding: 0 12px;
+  }
+
+  .rainbow-platform-brand {
+    display: none;
+  }
+
+  .rainbow-portal [data-testid="platform-management"] > div,
+  .rainbow-portal [data-testid="collection-home"] > div {
+    max-width: 100%;
+  }
+}
